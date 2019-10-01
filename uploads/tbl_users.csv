@@ -1,0 +1,6 @@
+userId,email,name,mobile,empCode,departmentId,designationId,doj,stateId,locationId,panNo,aadhar,pfuan,beneficiaryName,acNum,bankName,branch,city,ifscCode,basic,transAllow,spclAllow,lta,hra,bonus
+1,hr@aryacma.co.in,System Admin,9890098900,1,4,6,0000-00-00,0,0,,,0,,0,,,,,0,0,0,0,0,0
+2,manager@example.com,Manager,9890098900,2,8,2,0000-00-00,0,0,,,0,,0,,,,,0,0,0,0,0,0
+3,employee@example.com,Employee,9890098900,3,5,6,0000-00-00,0,0,,,0,,0,,,,,0,0,0,0,0,0
+9,jogendra.singh@aryacma.co.in,Jogendra Singh,9990895885,4,7,5,0000-00-00,0,0,,,0,,0,,,,,0,0,0,0,0,0
+11,testclient@aryacma.co.in,Testing Emp,9890098903,emp001,7,6,5/28/2019,3,9,CAHPS6255E,CAHPS6255EQWER,2147483647,Testing user,2147483647,ICICI ,SEC 63,NOIDA,ICICI00213,1000,1000,1000,1000,1000,1000
