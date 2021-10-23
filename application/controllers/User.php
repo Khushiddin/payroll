@@ -54,15 +54,42 @@ class User extends BaseController
             $data['userRecords'] = $this->user_model->userListing($searchText, $returns["page"], $returns["segment"]);
             
             $this->global['pageTitle'] = 'Arya Collateral : Employee Listing';
+             $data['type'] = 'ARYA';
             
             $this->loadViews("users", $this->global, $data, NULL);
+        }
+    }
+
+    function easyuserListing()
+    {
+        if($this->isAdmin() == TRUE)
+        {
+            $this->loadThis();
+        }
+        else
+        {        
+            $searchText = $this->security->xss_clean($this->input->post('searchText'));
+            $data['searchText'] = $searchText;
+            
+            $this->load->library('pagination');
+            
+            $count = $this->user_model->userListingCount($searchText);
+
+            $returns = $this->paginationCompress ( "easyuserListing/", $count, 10 );
+            
+            $data['userRecords'] = $this->user_model->eUserListing($searchText, $returns["page"], $returns["segment"]);
+            
+            $this->global['pageTitle'] = 'Arya Collateral : Employee Listing';
+            $data['type'] = 'EASY';
+            
+            $this->loadViews("easyUsers", $this->global, $data, NULL);
         }
     }
 
     /**
      * This function is used to load the add new form
      */
-    function addNew()
+    function addNew($type)
     {
         if($this->isAdmin() == TRUE)
         {
@@ -78,9 +105,10 @@ class User extends BaseController
             $data['states'] = $this->user_model->getUserStates();            
             
             $data['roles'] = $this->user_model->getUserRoles();
+            $data['type'] = $type;
             
             $this->global['pageTitle'] = 'Arya Collateral : Add New Employee';
-
+ 
             $this->loadViews("addNew", $this->global, $data, NULL);
         }
     }
@@ -137,18 +165,25 @@ class User extends BaseController
             $this->form_validation->set_rules('password','Password','required|max_length[20]');
             $this->form_validation->set_rules('cpassword','Confirm Password','trim|required|matches[password]|max_length[20]');
             //$this->form_validation->set_rules('role','Role','trim|required|numeric');
-            $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
+            if($this->input->post('type') == 'ARYA')
+            {
+                $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
+                $this->form_validation->set_rules('panNo','PAN No','required|min_length[10]');
+                $this->form_validation->set_rules('aadhar','Aadhar','required|min_length[12]');
+                $this->form_validation->set_rules('pfuan','PF UAN','required|min_length[10]');
+                $this->form_validation->set_rules('basic','BASIC','required|min_length[3]');
+            }
+            
             $this->form_validation->set_rules('empCode','Employee Code','required|min_length[3]');
-            $this->form_validation->set_rules('panNo','PAN No','required|min_length[10]');
-            $this->form_validation->set_rules('aadhar','Aadhar','required|min_length[12]');
-            $this->form_validation->set_rules('pfuan','PF UAN','required|min_length[10]');
+           
+            
             $this->form_validation->set_rules('acNum','Account Number','required|min_length[10]');
             $this->form_validation->set_rules('ifscCode','IFSC Code','required|min_length[5]');
-            $this->form_validation->set_rules('basic','BASIC','required|min_length[3]');
+            
             
             if($this->form_validation->run() == FALSE)
             {
-                $this->addNew();
+                $this->addNew($this->input->post('type'));
             }
             else
             {
@@ -178,6 +213,7 @@ class User extends BaseController
                 $lta = $this->security->xss_clean($this->input->post('lta'));
                 $hra = $this->security->xss_clean($this->input->post('hra'));
                 $bonus = $this->security->xss_clean($this->input->post('bonus'));
+                $empType = $this->security->xss_clean($this->input->post('type'));
                 
                 $userInfo = array('email'=>$email, 'password'=>getHashedPassword($password), 
                     'roleId'=>3, 'name'=> $name,'empCode'=>$empCode,
@@ -198,10 +234,11 @@ class User extends BaseController
                     'basic'=>$basic,
                     'transAllow'=>$transAllow,
                     'spclAllow'=>$spclAllow,
+                    'empType'=>$empType,
                     'lta'=>$lta,
                     'hra'=>$hra,
                     'bonus'=>$bonus, 'mobile'=>$mobile, 'createdBy'=>$this->vendorId, 'createdDtm'=>date('Y-m-d H:i:s'));
-                
+                // print_r($userInfo);die();
                 $this->load->model('user_model');
                 $result = $this->user_model->addNewUser($userInfo);
                 
@@ -214,7 +251,7 @@ class User extends BaseController
                     $this->session->set_flashdata('error', 'User creation failed');
                 }
                 
-                redirect('addNew');
+                redirect('addNew/'.$this->input->post('type'));
             }
         }
     }
@@ -224,7 +261,7 @@ class User extends BaseController
      * This function is used load user edit information
      * @param number $userId : Optional : This is user id
      */
-    function editOld($userId = NULL)
+    function editOld($userId = NULL,$type)
     {
         if($this->isAdmin() == TRUE || $userId == 1)
         {
@@ -242,6 +279,7 @@ class User extends BaseController
             $data['designations'] = $this->user_model->getUserDesignations();
             $data['states'] = $this->user_model->getUserStates();
             $data['userInfo'] = $this->user_model->getUserInfo($userId);
+            $data['type'] = $type;
             
             $this->global['pageTitle'] = 'Arya Collateral : Edit Employee';
             
@@ -272,25 +310,54 @@ class User extends BaseController
             $this->form_validation->set_rules('role','Role','trim|required|numeric');
             $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
             */
-            $this->form_validation->set_rules('fname','Full Name','trim|required|max_length[128]');
-            $this->form_validation->set_rules('email','Email','trim|required|valid_email|max_length[128]');
-            $this->form_validation->set_rules('password','Password','matches[cpassword]|max_length[20]');
-            $this->form_validation->set_rules('cpassword','Confirm Password','matches[password]|max_length[20]');
-            //$this->form_validation->set_rules('role','Role','trim|required|numeric');
-            $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
-            $this->form_validation->set_rules('empCode','Employee Code','required|min_length[3]');
-            $this->form_validation->set_rules('panNo','PAN No','required|min_length[10]');
-            $this->form_validation->set_rules('aadhar','Aadhar','required|min_length[12]');
-            $this->form_validation->set_rules('pfuan','PF UAN','required|min_length[10]');
-            $this->form_validation->set_rules('acNum','Account Number','required|min_length[10]');
-            $this->form_validation->set_rules('ifscCode','IFSC Code','required|min_length[5]');
-            $this->form_validation->set_rules('basic','BASIC','required|min_length[3]');
+            // print_r($this->input->post('type'));die();
+            if($this->input->post('type') == 'ARYA')
+            {
+                $this->form_validation->set_rules('fname','Full Name','trim|required|max_length[128]');
+                        $this->form_validation->set_rules('email','Email','trim|required|valid_email|max_length[128]');
+                        $this->form_validation->set_rules('password','Password','matches[cpassword]|max_length[20]');
+                        $this->form_validation->set_rules('cpassword','Confirm Password','matches[password]|max_length[20]');
+                        //$this->form_validation->set_rules('role','Role','trim|required|numeric');
+                        $this->form_validation->set_rules('mobile','Mobile Number','required|min_length[10]');
+                        $this->form_validation->set_rules('empCode','Employee Code','required|min_length[3]');
+                        $this->form_validation->set_rules('panNo','PAN No','required|min_length[10]');
+                        $this->form_validation->set_rules('aadhar','Aadhar','required|min_length[12]');
+                        $this->form_validation->set_rules('pfuan','PF UAN','required|min_length[10]');
+                        $this->form_validation->set_rules('acNum','Account Number','required|min_length[10]');
+                        $this->form_validation->set_rules('ifscCode','IFSC Code','required|min_length[5]');
+                        //$this->form_validation->set_rules('basic','BASIC','required|min_length[3]');
+                    }
+                        else{
+                            $this->form_validation->set_rules('fname','Full Name','trim|required|max_length[128]');
+                            $this->form_validation->set_rules('password','Password','matches[cpassword]|required|max_length[20]');
+                        $this->form_validation->set_rules('cpassword','Confirm Password','matches[password]|max_length[20]');
+                        //$this->form_validation->set_rules('empCode','Employee Code','required|min_length[3]');
+                        $this->form_validation->set_rules('acNum','Account Number','required|min_length[10]');
+                        }
             if($this->form_validation->run() == FALSE)
             {
-                $this->editOld($userId);
+                $this->editOld($userId,$this->input->post('type'));
             }
             else
             {
+                $fileName="";
+                $config['upload_path']          = 'uploads/';
+                $config['allowed_types']        = 'jpg|png|pdf';
+                $config['max_size']             = 0;
+                $config['max_width']            = 0;
+                $config['max_height']           = 0;
+
+                $this->load->library('upload', $config);
+                $PanFile = '';
+                if(!$this->upload->do_upload('pan_file')){
+                    
+                    $error = array('error' => $this->upload->display_errors());
+                    $this->session->set_flashdata('error', $error);
+                }else{
+                    $imageInfo = $this->upload->data();
+                    $PanFile = $imageInfo['file_name'];
+                }
+
                 $name = ucwords(strtolower($this->security->xss_clean($this->input->post('fname'))));
                 $email = strtolower($this->security->xss_clean($this->input->post('email')));
                 $password = $this->input->post('password');
@@ -317,6 +384,7 @@ class User extends BaseController
                 $lta = $this->security->xss_clean($this->input->post('lta'));
                 $hra = $this->security->xss_clean($this->input->post('hra'));
                 $bonus = $this->security->xss_clean($this->input->post('bonus'));
+                $empType = $this->security->xss_clean($this->input->post('type'));
                 
                 $userInfo = array();
                 
@@ -326,28 +394,195 @@ class User extends BaseController
                                     'mobile'=>$mobile, 'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));*/
 
                     $userInfo = array('email'=>$email, 'name'=> $name,'empCode'=>$empCode,
-                    'departmentId'=>$departmentId,'designationId'=>$designationId, 'doj'=>date('Y-m-d',strtotime($doj)),'stateId'=>$stateId,'locationId'=>$locationId,'panNo'=>$panNo,'aadhar'=>$aadhar,'pfuan'=>$pfuan, 'beneficiaryName'=>$beneficiaryName, 'acNum'=>$acNum, 'bankName'=>$bankName, 'branch'=>$branch,'city'=>$city,'ifscCode'=>$ifscCode,'basic'=>$basic,'transAllow'=>$transAllow, 'spclAllow'=>$spclAllow, 'lta'=>$lta, 'hra'=>$hra, 'bonus'=>$bonus, 'mobile'=>$mobile, 'createdBy'=>$this->vendorId, 'createdDtm'=>date('Y-m-d H:i:s'),'updatedDtm'=>date('Y-m-d H:i:s'));
+                    'departmentId'=>$departmentId,'designationId'=>$designationId, 'doj'=>date('Y-m-d',strtotime($doj)),'stateId'=>$stateId,'locationId'=>$locationId,'panNo'=>$panNo,'aadhar'=>$aadhar,'pfuan'=>$pfuan, 'beneficiaryName'=>$beneficiaryName, 'acNum'=>$acNum, 'bankName'=>$bankName, 'branch'=>$branch,'city'=>$city,'ifscCode'=>$ifscCode,'basic'=>$basic,'transAllow'=>$transAllow, 'spclAllow'=>$spclAllow, 'lta'=>$lta, 'hra'=>$hra, 'bonus'=>$bonus, 'mobile'=>$mobile,'empType'=>$empType,'pan_file'=>$PanFile, 'createdBy'=>$this->vendorId, 'createdDtm'=>date('Y-m-d H:i:s'),'updatedDtm'=>date('Y-m-d H:i:s'));
                 }
                 else
                 {
-                    $userInfo = array('email'=>$email, 'password'=>getHashedPassword($password), 'empCode'=>$empCode, 'departmentId'=>$departmentId, 'designationId'=>$designationId, 'doj'=>date('Y-m-d',strtotime($doj)),'stateId'=>$stateId,'locationId'=>$locationId,'panNo'=>$panNo,'aadhar'=>$aadhar,'pfuan'=>$pfuan, 'beneficiaryName'=>$beneficiaryName, 'acNum'=>$acNum, 'bankName'=>$bankName, 'branch'=>$branch,'city'=>$city,'ifscCode'=>$ifscCode,'basic'=>$basic,'transAllow'=>$transAllow, 'spclAllow'=>$spclAllow, 'lta'=>$lta, 'hra'=>$hra, 'bonus'=>$bonus, 'mobile'=>$mobile, 'createdBy'=>$this->vendorId, 'createdDtm'=>date('Y-m-d H:i:s'),'updatedDtm'=>date('Y-m-d H:i:s'));
+                    $userInfo = array('email'=>$email,'name'=> $name, 'password'=>getHashedPassword($password), 'empCode'=>$empCode, 'departmentId'=>$departmentId, 'designationId'=>$designationId, 'doj'=>date('Y-m-d',strtotime($doj)),'stateId'=>$stateId,'locationId'=>$locationId,'panNo'=>$panNo,'aadhar'=>$aadhar,'pfuan'=>$pfuan, 'beneficiaryName'=>$beneficiaryName, 'acNum'=>$acNum, 'bankName'=>$bankName, 'branch'=>$branch,'city'=>$city,'ifscCode'=>$ifscCode,'basic'=>$basic,'transAllow'=>$transAllow, 'spclAllow'=>$spclAllow, 'lta'=>$lta, 'hra'=>$hra, 'bonus'=>$bonus, 'mobile'=>$mobile,'empType'=>$empType,'pan_file'=>$PanFile, 'createdBy'=>$this->vendorId, 'createdDtm'=>date('Y-m-d H:i:s'),'updatedDtm'=>date('Y-m-d H:i:s'));
                 }
-                
+                // print_r($userInfo);die();
                 $result = $this->user_model->editUser($userInfo, $userId);
+// print_r('success');die();
+               $verify = $this->signzyidentify($PanFile,$panNo,$email,$name);
+
+               if($verify == '1')
+               {    
+                    $verifyarray = array('pan_verify'=>'verified');
+                    $v_result = $this->user_model->editUser($verifyarray, $userId);
+               }
+
+               // print_r($verify);die();
                 
                 if($result == true)
                 {
-                    $this->session->set_flashdata('success', 'Employee updated successfully');
+                    if($v_result == true && $verify == '1')
+                    {
+                        $this->session->set_flashdata('success', 'Employee updated and Pan Verify successfully');
+                    }else{
+                            $this->session->set_flashdata('success', 'Employee updated successfully');
+                                    }
                 }
                 else
                 {
                     $this->session->set_flashdata('error', 'Employee updation failed');
                 }
                 
-                redirect('userListing');
+                if($empType == 'ARYA'){
+                                redirect('userListing');
+                            }elseif($empType == 'EASY'){
+                                redirect('easyuserListing');
+                            }
+
             }
         }
     }
+
+
+
+function signzyidentify($PanFile,$panNo,$email,$name){
+
+  
+  $signzyToken="e6mrdPEDe49LSp7ucWqLAuWlhjP8XwHWKtEUAQNlMjAtdvhl5mUDPdw5XSqu0GJb";
+  $patronId = "5ee0d03f88a770306523da80";
+
+  $idType = "pan";
+
+  if(strtolower($idType) == "pan"){
+
+  $dataArr = [
+              "type"=> "individualPan",
+              "email"=> $email,
+              "callbackUrl"=> "https://your-domain.com/your-callback-system",
+              "images"=> [
+                "https://aryapayroll.aryacma.co.in/uploads/".$PanFile."",
+              ]
+            ];
+
+       $dataObj = json_encode($dataArr);
+       //print_r($dataObj);die;
+
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+    CURLOPT_URL => "https://signzy.tech/api/v2/patrons/".$patronId."/identities",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => "",
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 30,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => "POST",
+    CURLOPT_POSTFIELDS => $dataObj,
+    CURLOPT_HTTPHEADER => array(
+      "accept: */*",
+      "accept-language: en-US,en;q=0.8",
+      "authorization: ".$signzyToken."",
+      "content-type: application/json"
+    ),
+  ));
+
+  $response = curl_exec($curl);
+  $err = curl_error($curl);
+
+  curl_close($curl);
+
+  if ($err) {
+    echo "cURL Error #:" . $err;
+  } else {
+      $resArr = json_decode($response);
+   
+   //print_r($response); exit;
+   
+   $signzyToken =$resArr->accessToken;
+   $itemId = $resArr->id;
+   
+   $resultArray = $this->signzyverify($signzyToken,$itemId,$panNo,$name);
+   $resultArr = json_decode($resultArray);
+    // print_r($resultArr); exit;
+    $user_id = $resultArr->response->number;
+    $verify_status = $resultArr->response->result->verified;
+
+    $signzyDataArr = [
+     'user_id'  =>  $user_id,
+     'verify_status' =>  $verify_status     
+    ];
+
+    
+
+    if (file_put_contents("uploads/signzyfiles/$user_id".".json", $resultArray)){
+       // echo "JSON file created successfully...";
+      }
+   else {
+       // echo "Oops! Error creating json file...";
+   }
+
+   return $verify_status;
+ 
+  }
+ }
+
+
+ }
+
+
+
+function signzyverify($signzyToken,$itemId,$panNo,$name){
+
+
+
+
+  //$signzyToken="zhgfloxfs4gfw34cgc94bru3m7priis";
+  //$itemId = "5ef6ffcbc672dd7abae96e63";
+    // $panNo = 'AZCPL9069K';
+    // $name = 'Dileep Kumar Lodhi';
+
+ $dataArr = [
+      "service"=>"Identity",
+      "itemId"=>$itemId,
+      "task"=>"verification",
+      "accessToken"=>$signzyToken,
+      "essentials"=>[
+        "number"=>$panNo,
+        "name"=>$name,
+        "fuzzy"=>"true/false"
+        ]
+      ];
+
+      $dataObj = json_encode($dataArr);
+
+
+      $curl = curl_init();
+
+  curl_setopt_array($curl, array(
+    CURLOPT_URL => "https://signzy.tech/api/v2/snoops",
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => "",
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 30,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => "POST",
+    CURLOPT_POSTFIELDS => $dataObj,
+    CURLOPT_HTTPHEADER => array(
+      "accept: */*",
+      "accept-language: en-US,en;q=0.8",
+      "content-type: application/json"
+    ),
+  ));
+
+  $response = curl_exec($curl);
+  $err = curl_error($curl);
+
+  curl_close($curl);
+
+  if ($err) {
+    return "cURL Error #:" . $err;
+  } else {
+    return $response;
+  }
+
+ 
+
+
+}
 
 
     /**
@@ -363,7 +598,10 @@ class User extends BaseController
         else
         {
             $userId = $this->input->post('userId');
-            $userInfo = array('isDeleted'=>1,'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));
+            $status = $this->user_model->getUserInfoById($userId);
+            $status = 1 - $status->isDeleted;
+            $userInfo = array('isDeleted'=>$status,'updatedBy'=>$this->vendorId, 'updatedDtm'=>date('Y-m-d H:i:s'));
+            
             
             $result = $this->user_model->deleteUser($userId, $userInfo);
             
@@ -553,6 +791,76 @@ class User extends BaseController
             if ($result > 0) { echo(json_encode(array('status'=>TRUE,'data'=>$result))); }
             else { echo(json_encode(array('status'=>FALSE))); }
         }
+    }
+
+    //Roles
+    public function viewRoles()
+    {
+        if($this->isAdmin() == TRUE)
+        {
+            $this->loadThis();
+        }
+        else
+        {        
+            $searchText = $this->security->xss_clean($this->input->post('searchText'));
+            $data['searchText'] = $searchText;
+            
+            $this->load->library('pagination');
+            
+            $count = $this->user_model->userListingCount($searchText);
+
+            $returns = $this->paginationCompress ( "roles/", $count, 10 );
+            
+            $data['userRecords'] = $this->user_model->getAllUsers($searchText, $returns["page"], $returns["segment"]);
+            
+            $this->global['pageTitle'] = 'Arya Collateral : Employee Roles';
+            
+            $this->loadViews("roleUsers", $this->global, $data, NULL);
+        }
+
+    }
+
+    public function manageRoles($id)
+    {
+        $this->global['pageTitle'] = 'Arya Collateral : Manage Role';
+
+         $data['user'] = $this->user_model->getUserInfo($id);
+        
+        $this->loadViews("manageRole", $this->global, $data , NULL);
+    }
+
+    public function updateRole($id)
+    {
+        $this->global['pageTitle'] = 'Arya Collateral : Update Role';
+        $role = $this->security->xss_clean($this->input->post('role'));
+        $advancelimit = $this->security->xss_clean($this->input->post('advanceLimit'));
+        $expenselimit = $this->security->xss_clean($this->input->post('expenseLimit'));
+        $vendorLimit = $this->security->xss_clean($this->input->post('vendorLimit'));
+
+
+        $array = implode(', ', $role);
+
+         $userInfo = array('empRole'=>$array,'advanceLimit'=>$advancelimit,'expenseLimit'=>$expenselimit,'vendorLimit'=>$vendorLimit,'updatedDtm'=>date('Y-m-d H:i:s'));
+
+        $result = $this->user_model->editUser($userInfo, $id);
+                
+                if($result == true)
+                {
+                    $this->session->set_flashdata('success', 'Employee updated successfully');
+                }
+                else
+                {
+                    $this->session->set_flashdata('error', 'Employee updation failed');
+                }
+                
+                redirect('roles');
+    }
+
+    public function policy()
+    {
+        $this->global['pageTitle'] = 'AryaPayroll : Policy';
+        
+        $this->loadViews("policy", $this->global, NULL , NULL);
     }
 }
 

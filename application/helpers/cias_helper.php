@@ -148,4 +148,15 @@ if(!function_exists('setFlashData'))
     }
 }
 
+function approveName($id)
+    {
+        
+        $CI = &get_instance();
+
+        $CI->load->model('User_model');
+
+        $App = $CI->User_model->getUserName($id);
+        return $App->name;
+    } 
+
 ?>

@@ -35,30 +35,55 @@
                 <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
               </div>
             </div> --><!-- ./col -->
+            <!-- ./col -->
             <div class="col-lg-3 col-xs-6">
-              <div class="small-box bg-yellow">
-                <div class="inner">
-                  <h3>44</h3>
-                  <p>New User</p>
-                </div>
-                <div class="icon">
-                  <i class="ion ion-person-add"></i>
-                </div>
-                <a href="<?php echo base_url(); ?>userListing" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-              </div>
-            </div><!-- ./col -->
-            <!-- <div class="col-lg-3 col-xs-6">
               <div class="small-box bg-red">
                 <div class="inner">
-                  <h3>65</h3>
-                  <p>Reopened Issue</p>
+                  <h3>Advance</h3>
+                  <p>Advance Request</p>
                 </div>
                 <div class="icon">
                   <i class="ion ion-pie-graph"></i>
                 </div>
-                <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+                <a href="<?php echo base_url(); ?>adListing" class="small-box-footer">Advance <i class="fa fa-arrow-circle-right"></i></a>
               </div>
-            </div> --><!-- ./col -->
+            </div><!-- ./col -->
+            <div class="col-lg-3 col-xs-6">
+              <div class="small-box bg-blue">
+                <div class="inner">
+                  <h3>Vendor</h3>
+                  <p>Vendor Payment</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-stats-bars"></i>
+                </div>
+                <a href="<?php echo base_url(); ?>paymentListing" class="small-box-footer">Vendor <i class="fa fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
+            <div class="col-lg-3 col-xs-6">
+              <div class="small-box bg-yellow">
+                <div class="inner">
+                  <h3>Expenses</h3>
+                  <p>Expenses Booking</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-person-add"></i>
+                </div>
+                <a href="<?php echo base_url(); ?>exListing" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
+            <div class="col-lg-3 col-xs-6">
+              <div class="small-box bg-yellow">
+                <div class="inner">
+                  <h3>Policy</h3>
+                  <p>Time, Advance, Expense and Travel</p>
+                </div>
+                <div class="icon">
+                  <i class="ion ion-person-add"></i>
+                </div>
+                <a href="<?php echo base_url(); ?>policy" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+              </div>
+            </div>
           </div>
     </section>
 </div>

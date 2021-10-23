@@ -24,7 +24,34 @@
                     <div class="box-tools">
                         <form action="<?php echo base_url() ?>employeeListing" method="POST" id="searchList">
                             <div class="input-group">
-                              <input type="text" name="searchText" value="<?php echo $searchText; ?>" class="form-control input-sm pull-right" style="width: 150px;" placeholder="Search"/>
+                                <input type="text" name="searchText" value="<?php echo $searchText; ?>" class="form-control input-sm pull-right" style="width: 150px;" placeholder="Search"/>
+                                <select name="month" class="form-control input-sm pull-right" style="width: 150px;">
+                                    <option value="0">Select Month</option>
+                  <?php
+                      if(!empty($months)){
+                          foreach ($months as $k=>$m)
+                          {
+                          ?>
+                            <option value="<?php echo $k ?>" <?php if($k==$month){echo "selected=selected";}?>><?php echo $m ?></option>
+                          <?php
+                        }
+                      }
+                  ?>
+                                </select>
+                                <select name="year" class="form-control input-sm pull-right" style="width: 150px;">
+                                    <option value="0">Select Year</option>
+                  <?php
+                      if(!empty($years)){
+                          foreach ($years as $y)
+                          {
+                          ?>
+                            <option value="<?php echo $y ?>" <?php if($y==$year){echo "selected=selected";}?>><?php echo $y ?></option>
+                          <?php
+                        }
+                      }
+                  ?>
+                                </select>
+                              
                               <div class="input-group-btn">
                                 <button class="btn btn-sm btn-default searchList"><i class="fa fa-search"></i></button>
                               </div>
@@ -54,14 +81,22 @@
                         <th>LTA</th>
                         <th>HRA</th>
                         <th>Bonus</th>
+                        <th>Arrear Gross</th>
                         <th>Gross Salary</th>
                         <th>EPF</th>
                         <th>ESI</th>
                         <th>TDS</th>
+                        <th>Arrear PF</th>
+                        <th>Arrear ESIC</th>
                         <th>Advance</th>
+                        <th>Other Deduction</th>
+                        <th>LWF</th>
                         <th>PT</th>
+                        <th>Rimbursement</th>
+                        <th>Incentive</th>
                         <th>Total Deduction</th>
                         <th>Payable</th>
+
                     </thead>
                     <?php
                     if(!empty($userRecords))
@@ -79,25 +114,52 @@
                             $bonus      = round($record->bonus/$days*$pDays);
                             $gross = $basic+$transAllow+$spclAllow+$lta+$hra+$bonus;
                             $pf = round(($basic+$transAllow)*12/100);
-                            if($gross_structure>21000){
-                                $esic =0;    
-                            }else{
-                                $esic = ceil($gross*0.75/100);
-                            }
+                            // if($gross_structure>21000){
+                            //     $esic =0;    
+                            // }else{
+                            //     // $esic = ceil($gross*0.75/100);
+                            // }
 
-                            $tds = 0; $advance=0;
-                            if($record->tds>0){
-                                $tds = $record->tds;
-                            }
-                            if($record->advance_deduction>0){
-                                $advance = $record->advance_deduction;
-                            }
-                            $PT = 0;
-                            if($record->PT>0){
-                                $PT = $record->PT;
-                            }
-                            $deduction =$pf+$esic+$tds+$advance+$PT;  
-                            $netPayment = $gross-$deduction;
+                            // $tds = 0; $advance=0;
+                            // if($record->tds>0){
+                            //     $tds = $record->tds;
+                            // }
+                            // if($record->advance_deduction>0){
+                            //     $advance = $record->advance_deduction;
+                            // }
+                            // $PT = 0;
+                            // if($record->PT>0){
+                            //     $PT = $record->PT;
+                            // }
+                            // $deduction =$pf+$esic+$tds+$advance+$PT;  
+                            // $netPayment = $gross-$deduction;
+
+            //------------------------------------------------------------------
+                if(strtotime("$record->year-$record->month-01")<=strtotime('2019-11-01')){
+                    $A_gross_withoutBonus =$record->basic+$record->transAllow+$record->spclAllow+$record->lta+$record->hra+$record->bonus;    
+                }else{
+                    $A_gross_withoutBonus =$record->basic+$record->transAllow+$record->spclAllow+$record->lta+$record->hra;
+                }        
+
+                //$A_gross_withoutBonus =$record->basic+$record->transAllow+$record->spclAllow+$record->lta+$record->hra;
+                            //$A_gross_withoutBonus = $basic+$spclAllow+$lta+$hra;
+        
+            $A_gross = $basic+$transAllow+$spclAllow+$lta+$hra+$bonus;
+        
+        
+        $A_epf = round((12/100)*($basic+$transAllow));
+
+        if($A_gross_withoutBonus <= 21000){
+            $A_esi = round((0.75/100)*($A_gross+$record->incentive+$record->rimbersement));
+        }else{
+            $A_esi = 0;
+        }
+
+        $A_gross =$A_gross+$record->arrear;
+        $deduction = $A_epf+$A_esi+$record->tds+$record->PT+$record->advance_deduction+$record->arrear_pf+$record->arrear_esic+$record->other_deduction+$record->lwf;
+        $netPayment = $A_gross-$deduction+$record->incentive+$record->rimbersement;
+
+            //-------------------------------------------------
                     ?>
                     <tr>
                         <td><?php echo $record->empCode ?></td>
@@ -119,14 +181,22 @@
                         <td><?php echo $lta ?></td>
                         <td><?php echo $hra ?></td>
                         <td><?php echo $bonus ?></td>
-                        <td><?php echo $gross ?></td>
-                        <td><?php echo $pf ?></td>
-                        <td><?php echo $esic ?></td>
-                        <td><?php echo $tds ?></td>
-                        <td><?php echo $advance ?></td>
-                        <td><?php echo $PT ?></td>
-                        <td><?php echo $deduction ?></td>
-                        <td><?php echo $netPayment ?></td>                        
+                         <td><?php echo $record->arrear; ?></td>
+                        <td><?php echo $A_gross ?></td>
+                        <td><?php echo round($pf); ?></td>
+                        <td><?php echo round($A_esi); ?></td>
+                        <td><?php echo $record->tds ?></td>
+                        <td><?php echo $record->arrear_pf ?></td>
+                        <td><?php echo $record->arrear_esic ?></td>
+                        <td><?php echo $record->advance_deduction ?></td>
+                        <td><?php echo $record->other_deduction ?></td>
+                        <td><?php echo $record->lwf ?></td>
+                        <td><?php echo $record->PT ?></td>
+                        <td><?php echo $record->rimbersement ?></td>
+                        <td><?php echo $record->incentive ?></td>
+                        <td><?php echo round($deduction) ?></td>
+                        <td><?php echo round($netPayment); ?></td>   
+                                             
                     </tr>
                     <?php
                         }

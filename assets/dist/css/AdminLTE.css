@@ -4975,3 +4975,28 @@ table.text-center th {
     white-space: normal !important;
   }
 }
+.tab-content  ol { counter-reset:section; list-style-type:none; }
+.tab-content  ol li { list-style-type:none; }
+.tab-content  ol li ol { counter-reset:subsection; }
+.tab-content  ol li:before{
+    counter-increment:section;
+    content:counter(section) ". ";/*content:"Section " counter(section) ". ";*/
+}
+.tab-content  ol li ol li:before {
+    counter-increment:subsection;
+    content:counter(section) "." counter(subsection) " ";
+}
+.nav-tabs > li{
+     //background: #213148 url("../../images/heac/background.jpg") center center no-repeat;
+     font-weight: 600 !important;
+}
+.ui-widget{
+    font-family: 'Open Sans', sans-serif !important;
+}
+.prop_select{
+    width: 50% !important; margin:0 !important; padding:0 !important;
+}
+.tab-content{
+    margin: 30px 12px;
+}
+

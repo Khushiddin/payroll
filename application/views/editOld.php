@@ -32,17 +32,18 @@ $doj = date('d-m-Y',strtotime($userInfo->doj));
                         <h3 class="box-title">Enter Employee Details</h3>
                     </div><!-- /.box-header -->
                     <!-- form start -->
-                    
-                    <form role="form" action="<?php echo base_url() ?>editUser" method="post" id="editUser" role="form">
+                     
+                    <form role="form" action="<?php echo base_url() ?>editUser" method="post" id="editUser" role="form" enctype='multipart/form-data'>
                         <div class="box-body">
                             <div class="row">
                                 <div class="col-md-6">                                
                                     <div class="form-group">
                                         <label for="fname">Employee Name</label>
                                         <input type="text" class="form-control" id="fname" placeholder="Full Name" name="fname" value="<?php echo $name; ?>" maxlength="128">
-                                        <input type="hidden" value="<?php echo $userId; ?>" name="userId" id="userId" />    
+                                        <input type="hidden" value="<?php echo $userId; ?>" name="userId" id="userId" />  
+                                        <input type="hidden" name="type" value="<?php echo $type; ?>">  
                                     </div>
-                                    
+                                     
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -72,6 +73,7 @@ $doj = date('d-m-Y',strtotime($userInfo->doj));
                                         <input type="text" class="form-control required" id="empCode" name="empCode" value="<?php echo $userInfo->empCode; ?>" maxlength="20">
                                     </div>
                                 </div>
+                                <?php if($type == 'ARYA'){?>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="department">Department</label>
@@ -91,7 +93,9 @@ $doj = date('d-m-Y',strtotime($userInfo->doj));
                                         </select>
                                     </div>
                                 </div>
+                            <?php } ?>
                             </div>
+                            <?php if($type == 'ARYA'){?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -176,6 +180,7 @@ $doj = date('d-m-Y',strtotime($userInfo->doj));
                                     </div>
                                 </div>
                             </div>
+                        <?php } ?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -218,6 +223,7 @@ $doj = date('d-m-Y',strtotime($userInfo->doj));
                                     </div>
                                 </div>
                             </div>
+                            <?php if($type == 'ARYA'){?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -260,6 +266,15 @@ $doj = date('d-m-Y',strtotime($userInfo->doj));
                                     </div>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="city">Pan</label>
+                                        <input class="form-control" type="file" name="pan_file">
+                                    </div>
+                                </div>
+                            </div>
+                        <?php } ?>
                         </div><!-- /.box-body -->
     
                         <div class="box-footer">

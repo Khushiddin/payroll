@@ -16,7 +16,7 @@ class User_model extends CI_Model
      */
     function userListingCount($searchText = '')
     {
-        $this->db->select('BaseTbl.userId, BaseTbl.email, BaseTbl.name, BaseTbl.mobile, BaseTbl.createdDtm, Role.role','BaseTbl.empCode','BaseTbl.empCode','Dept.departmentName','Des.designationName');
+        $this->db->select('BaseTbl.userId, BaseTbl.email, BaseTbl.name, BaseTbl.mobile, BaseTbl.createdDtm, Role.role','BaseTbl.empCode','BaseTbl.empCode','Dept.departmentName','Des.designationName, BaseTbl.isDeleted');
         $this->db->from('tbl_users as BaseTbl');
         $this->db->join('tbl_roles as Role', 'Role.roleId = BaseTbl.roleId','left');
         $this->db->join('tbl_departments as Dept', 'Dept.id = BaseTbl.departmentId','left');
@@ -27,7 +27,7 @@ class User_model extends CI_Model
                             OR  BaseTbl.mobile  LIKE '%".$searchText."%')";
             $this->db->where($likeCriteria);
         }
-        $this->db->where('BaseTbl.isDeleted', 0);
+        //$this->db->where('BaseTbl.isDeleted', 0);
         $this->db->where('BaseTbl.roleId !=', 1);
         $query = $this->db->get();
         
@@ -43,7 +43,7 @@ class User_model extends CI_Model
      */
     function userListing($searchText = '', $page, $segment)
     {
-        $this->db->select('BaseTbl.userId, BaseTbl.email, BaseTbl.name, BaseTbl.mobile, BaseTbl.createdDtm, Role.role,BaseTbl.empCode, Dept.departmentName, Des.designationName');
+        $this->db->select('BaseTbl.userId, BaseTbl.email, BaseTbl.pan_verify, BaseTbl.name, BaseTbl.mobile, BaseTbl.createdDtm, Role.role,BaseTbl.empCode, Dept.departmentName, Des.designationName, BaseTbl.isDeleted, BaseTbl.panNo');
         $this->db->from('tbl_users as BaseTbl');
         $this->db->join('tbl_roles as Role', 'Role.roleId = BaseTbl.roleId','left');
         $this->db->join('tbl_departments as Dept', 'Dept.id = BaseTbl.departmentId','left');
@@ -54,12 +54,37 @@ class User_model extends CI_Model
                             OR  BaseTbl.mobile  LIKE '%".$searchText."%')";
             $this->db->where($likeCriteria);
         }
-        $this->db->where('BaseTbl.isDeleted', 0);
+        //$this->db->where('BaseTbl.isDeleted', 0);
         $this->db->where('BaseTbl.roleId !=', 1);
+        $this->db->where('BaseTbl.empType', 'ARYA');
         $this->db->order_by('BaseTbl.userId', 'DESC');
         $this->db->limit($page, $segment);
         $query = $this->db->get();
-        
+         
+        $result = $query->result();
+        return $result;
+    }
+
+    function eUserListing($searchText = '', $page, $segment)
+    {
+        $this->db->select('BaseTbl.userId, BaseTbl.email, BaseTbl.name, BaseTbl.mobile, BaseTbl.createdDtm, Role.role,BaseTbl.empCode, Dept.departmentName, Des.designationName,BaseTbl.isDeleted');
+        $this->db->from('tbl_users as BaseTbl');
+        $this->db->join('tbl_roles as Role', 'Role.roleId = BaseTbl.roleId','left');
+        $this->db->join('tbl_departments as Dept', 'Dept.id = BaseTbl.departmentId','left');
+        $this->db->join('tbl_designations as Des', 'Des.id = BaseTbl.designationId','left');
+        if(!empty($searchText)) {
+            $likeCriteria = "(BaseTbl.email  LIKE '%".$searchText."%'
+                            OR  BaseTbl.name  LIKE '%".$searchText."%'
+                            OR  BaseTbl.mobile  LIKE '%".$searchText."%')";
+            $this->db->where($likeCriteria);
+        }
+        //$this->db->where('BaseTbl.isDeleted', 0);
+        $this->db->where('BaseTbl.roleId !=', 1);
+        $this->db->where('BaseTbl.empType', 'EASY');
+        $this->db->order_by('BaseTbl.userId', 'DESC');
+        $this->db->limit($page, $segment);
+        $query = $this->db->get();
+         
         $result = $query->result();
         return $result;
     }
@@ -126,6 +151,32 @@ class User_model extends CI_Model
         $insert_id = $this->db->insert_id();
         
         $this->db->trans_complete();
+
+        //$this->db->last_query();die;
+        
+        return $insert_id;
+    }
+
+    function addSalarySlip($userInfo)
+    {
+        $this->db->trans_start();
+        $this->db->insert('tbl_salary_slip', $userInfo);
+        
+        $insert_id = $this->db->insert_id();
+        
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function addUserTrans($userInfo)
+    {
+        $this->db->trans_start();
+        $this->db->insert('tbl_user_trans', $userInfo);
+        
+        $insert_id = $this->db->insert_id();
+        
+        $this->db->trans_complete();
         
         return $insert_id;
     }
@@ -137,14 +188,50 @@ class User_model extends CI_Model
      */
     function getUserInfo($userId)
     {
-        $this->db->select('userId, name, email, mobile, roleId,empCode,departmentId,designationId,doj,stateId,locationId,panNo,aadhar, pfuan, beneficiaryName, acNum, bankName, branch, city, ifscCode, basic, transAllow, spclAllow, lta, hra, bonus');
+        $this->db->select('userId, name, email, mobile, roleId,empRole,empCode,departmentId,designationId,doj,stateId,locationId,panNo,aadhar, pfuan, beneficiaryName, acNum, bankName, branch, city, ifscCode, basic, transAllow, spclAllow, lta, hra, bonus, advanceLimit, expenseLimit, vendorLimit');
         $this->db->from('tbl_users');
         $this->db->where('isDeleted', 0);
 		$this->db->where('roleId !=', 1);
         $this->db->where('userId', $userId);
         $query = $this->db->get();
         
+        //echo $this->db->last_query();die;
         return $query->row();
+    }
+
+    function getUserInfoByCode($empCode)
+    {
+        $this->db->select('userId, name, email, mobile, roleId,empRole,empCode,departmentId,designationId,doj,stateId,locationId,panNo,aadhar, pfuan, beneficiaryName, acNum, bankName, branch, city, ifscCode, basic, transAllow, spclAllow, lta, hra, bonus');
+        $this->db->from('tbl_users');
+        //$this->db->where('isDeleted', 0);
+        $this->db->where('roleId !=', 1);
+        $this->db->where('empCode', $empCode);
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    function getAllUsers($searchText = '', $page, $segment)
+    {
+        $this->db->select('BaseTbl.userId, BaseTbl.email, BaseTbl.name, BaseTbl.mobile, BaseTbl.createdDtm, Role.role,BaseTbl.empCode, Dept.departmentName, Des.designationName');
+        $this->db->from('tbl_users as BaseTbl');
+        $this->db->join('tbl_roles as Role', 'Role.roleId = BaseTbl.roleId','left');
+        $this->db->join('tbl_departments as Dept', 'Dept.id = BaseTbl.departmentId','left');
+        $this->db->join('tbl_designations as Des', 'Des.id = BaseTbl.designationId','left');
+        if(!empty($searchText)) {
+            $likeCriteria = "(BaseTbl.email  LIKE '%".$searchText."%'
+                            OR  BaseTbl.name  LIKE '%".$searchText."%'
+                            OR  BaseTbl.mobile  LIKE '%".$searchText."%')";
+            $this->db->where($likeCriteria);
+        }
+        $this->db->where('BaseTbl.isDeleted', 0);
+        $this->db->where('BaseTbl.roleId !=', 1);
+        $this->db->where('BaseTbl.empType', 'ARYA');
+        $this->db->order_by('BaseTbl.userId', 'DESC');
+        $this->db->limit($page, $segment);
+        $query = $this->db->get();
+         
+        $result = $query->result();
+        return $result;
     }
     
     
@@ -156,6 +243,14 @@ class User_model extends CI_Model
     function editUser($userInfo, $userId)
     {
         $this->db->where('userId', $userId);
+        $this->db->update('tbl_users', $userInfo);
+        
+        return TRUE;
+    }
+
+    function editSalaryStructure($userInfo, $empCode)
+    {
+        $this->db->where('empCode', $empCode);
         $this->db->update('tbl_users', $userInfo);
         
         return TRUE;
@@ -285,9 +380,9 @@ class User_model extends CI_Model
      */
     function getUserInfoById($userId)
     {
-        $this->db->select('userId, name, email, mobile, roleId');
+        $this->db->select('userId, name, email, mobile, roleId, isDeleted');
         $this->db->from('tbl_users');
-        $this->db->where('isDeleted', 0);
+        //$this->db->where('isDeleted', 0);
         $this->db->where('userId', $userId);
         $query = $this->db->get();
         
@@ -307,8 +402,8 @@ class User_model extends CI_Model
         $this->db->where('BaseTbl.userId', $userId);
         $this->db->where('BaseTbl.isDeleted', 0);
         $query = $this->db->get();
-        
-        return $query->row();
+        return $result = $query->row();
+        //return $result->userId;
     }
 
     function getUserDepartments()
@@ -351,14 +446,15 @@ class User_model extends CI_Model
         return $query->result();
     }
 
-    function employeeListing($searchText = '', $page, $segment)
+    function employeeListing($searchText = '', $page, $segment, $month, $year)
     {
         
-        $month = 9;
-        $year = 2019;  
-        $this->db->select('BaseTbl.userId, BaseTbl.name, BaseTbl.empCode, BaseTbl.acNum,BaseTbl.ifscCode,BaseTbl.bankName, BaseTbl.basic, BaseTbl.transAllow, BaseTbl.spclAllow, BaseTbl.lta, BaseTbl.hra, BaseTbl.bonus, Slip.presentDays, Slip.month, Slip.year, Slip.tds, Slip.advance_deduction, Slip.PT');
+        $month = $month;
+        $year = $year;  
+        $this->db->select('BaseTbl.userId, BaseTbl.name, BaseTbl.empCode, BaseTbl.acNum,BaseTbl.ifscCode,BaseTbl.bankName, Trans.basic, Trans.transAllow, Trans.spclAllow, Trans.lta, Trans.hra, Trans.bonus, Slip.presentDays, Slip.month, Slip.year, Slip.tds, Slip.advance_deduction, Slip.PT, Slip.arrear, Slip.incentive, Slip.rimbersement, Slip.arrear_pf, Slip.arrear_esic, Slip.other_deduction, Slip.lwf');
         $this->db->from('tbl_users as BaseTbl');
         $this->db->join('tbl_salary_slip as Slip', 'Slip.userId = BaseTbl.userId','left');
+        $this->db->join('tbl_user_trans as Trans', 'Trans.userId = BaseTbl.userId','left');
         if(!empty($searchText)) {
             $likeCriteria = "(BaseTbl.empCode  LIKE '%".$searchText."%'
                             OR  BaseTbl.name  LIKE '%".$searchText."%'
@@ -369,6 +465,8 @@ class User_model extends CI_Model
         $this->db->where('BaseTbl.roleId !=', 1);
         $this->db->where('Slip.month', $month);
         $this->db->where('Slip.year', $year);
+        $this->db->where('Trans.month', $month);
+        $this->db->where('Trans.year', $year);
         $this->db->order_by('BaseTbl.userId', 'DESC');
         $this->db->limit($page, $segment);
         $query = $this->db->get();
@@ -378,9 +476,10 @@ class User_model extends CI_Model
 
     function employeeListingCount($searchText = '')
     {
-        $this->db->select('BaseTbl.userId, BaseTbl.name, BaseTbl.empCode, BaseTbl.acNum,BaseTbl.ifscCode,BaseTbl.bankName, BaseTbl.basic, BaseTbl.transAllow, BaseTbl.spclAllow, BaseTbl.lta, BaseTbl.hra, BaseTbl.bonus, Slip.presentDays, Slip.month, Slip.year, Slip.tds, Slip.advance_deduction, Slip.PT');
+        $this->db->select('BaseTbl.userId, BaseTbl.name, BaseTbl.empCode, BaseTbl.acNum,BaseTbl.ifscCode,BaseTbl.bankName, Trans.basic, Trans.transAllow, Trans.spclAllow, Trans.lta, Trans.hra, Trans.bonus, Slip.presentDays, Slip.month, Slip.year, Slip.tds, Slip.advance_deduction, Slip.PT');
         $this->db->from('tbl_users as BaseTbl');
         $this->db->join('tbl_salary_slip as Slip', 'Slip.userId = BaseTbl.userId','left');
+        $this->db->join('tbl_user_trans as Trans', 'Trans.userId = BaseTbl.userId','left');
         if(!empty($searchText)) {
             $likeCriteria = "(BaseTbl.empCode  LIKE '%".$searchText."%'
                             OR  BaseTbl.name  LIKE '%".$searchText."%'
@@ -389,10 +488,101 @@ class User_model extends CI_Model
         }
         $this->db->where('BaseTbl.isDeleted', 0);
         $this->db->where('BaseTbl.roleId !=', 1);
+        //$this->db->where('Slip.month', $month);
+        //$this->db->where('Slip.year', $year);
+        //$this->db->where('Trans.month', $month);
+        //$this->db->where('Trans.year', $year);
         $query = $this->db->get();
         
         return $query->num_rows();
-    }    
+    } 
+
+    function checkEmpAttendance($empCode,$month,$year){
+        if($empCode){
+            $this->db->select('BaseTbl.id')->from('tbl_salary_slip as BaseTbl')->where('BaseTbl.empCode',$empCode)->where('BaseTbl.month',$month)->where('BaseTbl.year',$year);
+            $query = $this->db->get();
+            return $query->num_rows();
+        }
+    }   
+
+    function checkEmpAtt($empCode){
+        if($empCode){
+            $this->db->select('BaseTbl.userId')->from('tbl_users as BaseTbl')->where('BaseTbl.empCode',$empCode);
+            $query = $this->db->get();
+            return $query->num_rows();
+        }
+    }
+
+    function getdesignationId($designation)
+    {
+        if($designation){
+            $this->db->select('id');
+            $this->db->from('tbl_designations');
+            $this->db->where('isDeleted', 0);
+            $this->db->where('designationName ', $designation);
+            $query = $this->db->get();
+           if($query->num_rows()>0){
+                return $query->row()->id;        
+           }
+                    
+        }
+    }
+
+    function getdepartmentId($department)
+    {
+        if($department){
+            $this->db->select('id');
+            $this->db->from('tbl_departments');
+            $this->db->where('isDeleted', 0);
+            $this->db->where('departmentName ', $department);
+            $query = $this->db->get();
+           if($query->num_rows()>0){
+                return $query->row()->id;        
+           }
+                    
+        }
+    }
+    function getstateId($state)
+    {
+        if($state){
+            $this->db->select('id');
+            $this->db->from('tbl_states');
+            $this->db->where('name ', $state);
+            $query = $this->db->get();
+           if($query->num_rows()>0){
+                return $query->row()->id;        
+           }
+                    
+        }
+    }
+
+    function dateformat($value) {
+        if (strstr($value, "/")) {
+            $dateValue = explode("/", $value);
+        } else {
+            $dateValue = explode("-", $value);
+        }
+        if ($dateValue[1] > 12 && $dateValue[0] <= 12) {
+            $dateValue = explode("-", $dateValue[1] . "-" . $dateValue[0] . "-" . $dateValue[2]);
+        }
+        $value = $this->curDate($dateValue[0] . "-" . $dateValue[1] . "-" . $dateValue[2], "d-m-Y");
+        return $value;
+    }
+
+    function curDate($dat,$type){
+       return date('Y-m-d',strtotime($dat));
+    }
+
+    function getUserName($id)
+    {
+        $this->db->select('name');
+        $this->db->from('tbl_users');
+        $this->db->where('userId', $id);
+        $query = $this->db->get();
+        
+        return $query->row();
+    }
+
 }
 
   

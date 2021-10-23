@@ -24,6 +24,7 @@
                     <!-- form start -->
                     <?php $this->load->helper("form"); ?>
                     <form role="form" id="addUser" action="<?php echo base_url() ?>addNewUser" method="post" role="form">
+                        <input type="hidden" name="type" value="<?php echo $type; ?>">
                         <div class="box-body">
                             <div class="row">
                                 <div class="col-md-6">                                
@@ -61,7 +62,9 @@
                                         <input type="text" class="form-control required" id="empCode" name="empCode" maxlength="20">
                                     </div>
                                 </div>
+                                
                                 <div class="col-md-6">
+                                    <?php if($type == 'ARYA'){?>
                                     <div class="form-group">
                                         <label for="department">Department</label>
                                         <select class="form-control required" id="departmentId" name="departmentId">
@@ -79,8 +82,10 @@
                                             ?>
                                         </select>
                                     </div>
+                                <?php } ?>
                                 </div>
                             </div>
+                            <?php if($type == 'ARYA'){?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -192,6 +197,7 @@
                                     </div>
                                 </div> -->    
                             </div>
+                        <?php }?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -234,6 +240,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <?php if($type == 'ARYA'){?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -276,6 +283,7 @@
                                     </div>
                                 </div>
                             </div>
+                        <?php }?>
                         </div><!-- /.box-body -->
     
                         <div class="box-footer">

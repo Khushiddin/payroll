@@ -19,7 +19,7 @@ class Payroll extends BaseController
         $this->months = ['1'=>'January','2'=>'Feburary','3'=>'March','4'=>'April','5'=>'May','6'=>'June','7'=>'July','8'=>'August','9'=>'September','10'=>'October','11'=>'November','12'=>'December'];
         
         
-        $this->years = [2018,2019];    
+        $this->years = [2018,2019,2020];    
     }
     
     /**
@@ -34,6 +34,7 @@ class Payroll extends BaseController
         }
         else
         {
+            
             $month = $this->input->post('month');
             $year = $this->input->post('year');
 
@@ -55,7 +56,7 @@ class Payroll extends BaseController
                             
             $data['userRecords'] = $this->payroll_model->salarySlip($userId, $month, $year);
             
-            $this->global['pageTitle'] = 'Aryadhan : Salary Slip';
+            $this->global['pageTitle'] = 'Salary Slip | ARYACOLLATERAL :';
             
             $this->loadViews("payroll/salarySlip", $this->global, $data, NULL);
         }        
@@ -69,7 +70,7 @@ class Payroll extends BaseController
             if(!empty($data)){
                 foreach($data as $user){
                     $days = cal_days_in_month(CAL_GREGORIAN, $user->month, $user->year); 
-                    
+                 // print_r($user);die();
                     if($days<$user->presentDays){
                         $this->session->set_flashdata('error', 'Present Days is greater than month days.');
                         redirect('/payroll/index');
@@ -79,48 +80,103 @@ class Payroll extends BaseController
                     $month = $this->months[$user->month]; 
                     $year  = $user->year;
                     $naration = 'Pay Slip for '.$month.'-'.$year;
-                    $gross_structure = $user->basic+$user->transAllow+$user->spclAllow+$user->lta+$user->hra+$user->bonus;
+                    // $gross_structure = $user->basic+$user->transAllow+$user->spclAllow+$user->lta+$user->hra+$user->bonus;
+                    // $pDays = $user->presentDays;
+                    // $basic      = round($user->basic/$days*$pDays);
+                    // $transAllow = round($user->transAllow/$days*$pDays);
+                    // $spclAllow  = round($user->spclAllow/$days*$pDays);
+                    // $lta        = round($user->lta/$days*$pDays);
+                    // $hra        = round($user->hra/$days*$pDays);
+                    // $bonus      = round($user->bonus/$days*$pDays);
+                    // $gross = $basic+$transAllow+$spclAllow+$lta+$hra+$bonus;
+
+                    
+
+                    $gross_structure = $user->Tbasic+$user->TtransAllow+$user->spclAllow+$user->Tlta+$user->Thra+$user->Tbonus;
                     $pDays = $user->presentDays;
-                    $basic      = round($user->basic/$days*$pDays);
-                    $transAllow = round($user->transAllow/$days*$pDays);
-                    $spclAllow  = round($user->spclAllow/$days*$pDays);
-                    $lta        = round($user->lta/$days*$pDays);
-                    $hra        = round($user->hra/$days*$pDays);
-                    $bonus      = round($user->bonus/$days*$pDays);
+                    $basic      = round($user->Tbasic/$days*$pDays);
+                    $transAllow  = round($user->TtransAllow/$days*$pDays);
+                    $spclAllow  = round($user->TspclAllow/$days*$pDays);
+                    $lta        = round($user->Tlta/$days*$pDays);
+                    $hra        = round($user->Thra/$days*$pDays);
+                    $bonus      = round($user->Tbonus/$days*$pDays);
                     $gross = $basic+$transAllow+$spclAllow+$lta+$hra+$bonus;
+                      
+
                     /* Deduction */
                     $pf = round(($basic+$transAllow)*12/100);
-                    if($gross_structure>21000){
-                        $esic =0;    
+                    if(strtotime("$user->year-$user->month-01")<=strtotime('2019-11-01')){
+                    $A_gross_withoutBonus =$user->Tbasic+$user->TtransAllow+$user->TspclAllow+$user->Tlta+$user->Thra+$user->Tbonus;    
                     }else{
-                        $esic =ceil($gross*0.75/100);
-                    }
-
-                    $tds = 0;
-                    if($user->tds>0){
-                        $tds = $user->tds;
-                    }
-                    $advance = 0;
-                    if($user->advance_deduction>0){
-                        $advance = $user->advance_deduction;
-                    }
-                    $PT = 0;
-                    if($user->PT>0){
-                        $PT = $user->PT;
-                    }
+                    $A_gross_withoutBonus =$user->Tbasic+$user->TtransAllow+$user->TspclAllow+$user->Tlta+$user->Thra;
+                    } 
                     
+
+                    $A_gross = $basic+$transAllow+$spclAllow+$lta+$hra+$bonus;
+            
+                    $tds = $user->tds;
+                    $advance = $user->advance_deduction;
+                    $other = $user->other_deduction;
+                    $PT = $user->PT;
                     $vpf = 0;
 
-                    $deduction =$pf+$esic+$tds+$advance+$vpf-$PT;  
-                    /**/
-                    $netPayment = $gross-$deduction;
+                    $A_epf = round((12/100)*($basic+$transAllow));
+                    
+                    if($A_gross_withoutBonus <= 21000){
+                        $esic = ceil((0.75/100)*($A_gross+$user->incentive+$user->rimbersement));
+                    }else{
+                        $esic = 0;
+                    }
+
+                    /*Arrear add after ESI */
+                    $A_gross = $A_gross+$user->arrear;
+                    
+                    $deduction = $A_epf+$esic+$user->tds+$user->PT+$user->advance_deduction+$user->arrear_pf+$user->arrear_esic+$user->other_deduction;
+                    
+                    $netPayment = $A_gross-$deduction+$user->incentive+$user->rimbersement;
 
                     $netPaymentInWord = $this->getindiancurrency($netPayment);
 
+                    if($user->arrear){
+                        $arrear = $user->arrear;
+                    }else{ $arrear=0; }
+                    if($user->rimbersement){
+                        $reimb = $user->rimbersement;
+                    }else { $reimb = 0;}
+
+                    if($user->incentive){
+                        $incent = $user->incentive;
+                    }else { $incent = 0;}
+                    if($user->arrear_pf){
+                        $arPF = $user->arrear_pf;
+                    }else { $arPF = 0;}
+                    if($user->arrear_esic){
+                        $arES = $user->arrear_esic;
+                    }else { $arES = 0;}
+                    
+
+    $gst= '';
+    if($transAllow>0){
+      $gst = <<<EOD
+                <tr>
+                    <td>TRANS. ALLOWANCE</td>
+                    <td align="right">{$transAllow}</td>
+                    <td align="right">{$user->TtransAllow}</td>
+                    <td align="right">0.00</td>
+                    <td align="right">{$transAllow}</td>
+                </tr>
+                
+EOD;
+}else{
+    $gst = <<<EOD
+EOD;
+
+}
                     $this->load->library('Pdf');
                     $pdf = new Pdf('P', 'mm', 'A4', true, 'UTF-8', false);
                     $pdf->SetTitle('Pay Slip');
-                    $pdf->SetHeaderData(PDF_HEADER_LOGO, 35, '','ARYA COLLATERAL WAREHOUSING PVT. LTD.','H-82, Sector-63, Ground floor, Behind Ginger Hotel,
+                    //$pdf->SetHeaderData(PDF_HEADER_LOGO, 35, '','ARYADHAN FINANCIAL SOLUTIONS PVT. LTD.','H-82, Sector-63, Ground floor, Behind Ginger Hotel,Noida-201301 (U.P.)','');
+                    $pdf->SetHeaderData(PDF_HEADER_LOGO, 40, '','ARYA COLLATERAL WAREHOUSING SERVICES PVT. LTD.','H-82, Sector-63, Ground floor, Behind Ginger Hotel,
              Noida-201301 (U.P.)','');
                     //$pdf->SetTopMargin(20);
                     $pdf->setFooterMargin(20);
@@ -218,35 +274,29 @@ $tbl = <<<EOD
                     <tr>
                         <td>BASIC</td>
                         <td align="right">{$basic}</td>
-                        <td align="right">{$user->basic}</td>
+                        <td align="right">{$user->Tbasic}</td>
                         <td align="right">0.00</td>
                         <td align="right">{$basic}</td>       
                     </tr>
                     <tr>
                         <td>HRA</td>
                         <td align="right">{$hra}</td>
-                        <td align="right">{$user->hra}</td>
+                        <td align="right">{$user->Thra}</td>
                         <td align="right">0.00</td>
                         <td align="right">{$hra}</td>       
                     </tr>
-                    <tr>
-                        <td>TRANS. ALLOWANCE</td>
-                        <td align="right">{$transAllow}</td>
-                        <td align="right">{$user->transAllow}</td>
-                        <td align="right">0.00</td>
-                        <td align="right">{$transAllow}</td>       
-                    </tr>
+                    {$gst}
                     <tr>
                         <td>SPECIAL ALLOWANCE</td>
                         <td align="right">{$spclAllow}</td>
-                        <td align="right">{$user->spclAllow}</td>
+                        <td align="right">{$user->TspclAllow}</td>
                         <td align="right">0.00</td>
                         <td align="right">{$spclAllow}</td>       
                     </tr>
                     <tr>
                         <td>LTA</td>
                         <td align="right">{$lta}</td>
-                        <td align="right">{$user->lta}</td>
+                        <td align="right">{$user->Tlta}</td>
                         <td align="right">0.00</td>
                         <td align="right">{$lta}</td>       
                     </tr>
@@ -254,17 +304,39 @@ $tbl = <<<EOD
                     <tr>
                         <td>BONUS</td>
                         <td align="right">{$bonus}</td>
-                        <td align="right">{$user->bonus}</td>
+                        <td align="right">{$user->Tbonus}</td>
                         <td align="right">0.00</td>
                         <td align="right">{$bonus}</td>       
+                    </tr>
+                    <tr>
+                        <td>ARREAR</td>
+                        <td align="right"></td>
+                        <td align="right"></td>
+                        <td align="right"></td>
+                        <td align="right">{$arrear}</td>       
+                    </tr>
+                    <tr>
+                        <td>REIMBURSEMENT</td>
+                        <td align="right"></td>
+                        <td align="right"></td>
+                        <td align="right"></td>
+                        <td align="right">{$reimb}</td>       
+                    </tr>
+                    <tr>
+                        <td>INCENTIVE</td>
+                        <td align="right"></td>
+                        <td align="right"></td>
+                        <td align="right"></td>
+                        <td align="right">{$incent}</td>       
                     </tr>
                     <tr>
                         <td class="dttab"><strong>GROSS EARNING</strong></td>
                         <td class="dttab" align="right"><strong>{$gross}</strong></td>
                         <td class="dttab" align="right"><strong>{$gross_structure}</strong></td>
                         <td class="dttab" align="right"><strong>0.00</strong></td>
-                        <td class="dttab" align="right"><strong>{$gross}</strong></td>       
+                        <td class="dttab" align="right"><strong>{$A_gross}</strong></td>       
                     </tr>
+                    
 
                 </table>
             </td>
@@ -287,16 +359,24 @@ $tbl = <<<EOD
                         <td align="right">{$tds}</td>
                     </tr>
                     <tr>
-                        <td>Advance</td>
+                        <td>ADVANCE</td>
                         <td align="right">{$advance}</td>
                     </tr>
                     <tr>
-                        <td>VPF</td>
-                        <td align="right">{$vpf}</td>
+                        <td>OTHER</td>
+                        <td align="right">{$other}</td>
                     </tr>
                     <tr>
                         <td>PT</td>
                         <td align="right">{$PT}</td>
+                    </tr>
+                    <tr>
+                        <td>Arrear PF</td>
+                        <td align="right">{$arPF}</td>
+                    </tr>
+                    <tr>
+                        <td>Arrear ESIC</td>
+                        <td align="right">{$arES}</td>
                     </tr>
                     <tr>
                         <td class="dttab"><strong>GROSS DEDUCTIONS</strong></td>
@@ -390,7 +470,22 @@ exit;
 
             $returns = $this->paginationCompress ( "employeeListing/", $count, 1000 );
             
-            $data['userRecords'] = $this->user_model->employeeListing($searchText, $returns["page"], $returns["segment"]);
+            $month = $this->input->post('month');
+            $year = $this->input->post('year');
+
+            if(empty($month)){
+                $month = date('n');
+            }
+            if(empty($year)){
+                $year = date('Y');
+            }
+            $data['month'] = $month;
+            $data['year']  = $year;
+
+            $data["months"] = $this->months;
+            $data["years"] = $this->years;
+            // print_r($year);
+            $data['userRecords'] = $this->user_model->employeeListing($searchText, $returns["page"], $returns["segment"], $month, $year);
             
             $this->global['pageTitle'] = 'Arya : Employee Listing';
             

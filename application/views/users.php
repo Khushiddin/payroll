@@ -10,7 +10,8 @@
         <div class="row">
             <div class="col-xs-12 text-right">
                 <div class="form-group">
-                    <a class="btn btn-primary" href="<?php echo base_url(); ?>addNew"><i class="fa fa-plus"></i> Add New</a>
+                    <a class="btn btn-primary" href="<?php echo base_url(); ?>addNew/<?php echo $type;?>"><i class="fa fa-plus"></i> Add New</a>
+                    
                 </div>
             </div>
         </div>
@@ -58,10 +59,17 @@
                         <td><?php echo $record->mobile ?></td>
                         <!-- <td><?php //echo $record->role ?></td> -->
                         <td><?php echo date("d-m-Y", strtotime($record->createdDtm)) ?></td>
-                        <td class="text-center">
+                        <td class="text-center" style="display: inline-flex;">
                             <a class="btn btn-sm btn-primary" href="<?= base_url().'login-history/'.$record->userId; ?>" title="Login history"><i class="fa fa-history"></i></a> | 
-                            <a class="btn btn-sm btn-info" href="<?php echo base_url().'editOld/'.$record->userId; ?>" title="Edit"><i class="fa fa-pencil"></i></a>
-                            <a class="btn btn-sm btn-danger deleteUser" href="#" data-userid="<?php echo $record->userId; ?>" title="Delete"><i class="fa fa-trash"></i></a>
+                            <a class="btn btn-sm btn-info" href="<?php echo base_url().'editOld/'.$record->userId.'/'.$type; ?>" title="Edit"><i class="fa fa-pencil"></i></a> |
+                            <?php if($record->isDeleted == 0) {?>
+                            <a class="btn btn-sm btn-success deleteUser" href="#" data-userid="<?php echo $record->userId; ?>" title="Change User Status to Inactive">Active</i></a> |
+                        <?php } else {?>
+                            <a class="btn btn-sm btn-danger deleteUser" href="#" data-userid="<?php echo $record->userId; ?>" title="Change User Status to Active">Inactive</i></a> |
+                        <?php } ?>
+                        <?php if($record->pan_verify == 'verified') { ?>
+                            <a class="btn btn-sm btn-success" href="https://aryapayroll.aryacma.co.in/uploads/signzyfiles/<?php echo $record->panNo;?>.json">Pan Verified</i></a>
+                        <?php }?>
                         </td>
                     </tr>
                     <?php

@@ -62,10 +62,12 @@ $route['dashboard'] = 'user';
 $route['logout'] = 'user/logout';
 $route['userListing'] = 'user/userListing';
 $route['userListing/(:num)'] = "user/userListing/$1";
-$route['addNew'] = "user/addNew";
+$route['easyuserListing'] = 'user/easyuserListing';
+$route['easyuserListing/(:num)'] = "user/easyuserListing/$1";
+$route['addNew/(:any)'] = "user/addNew/$1";
 $route['addNewUser'] = "user/addNewUser";
 $route['editOld'] = "user/editOld";
-$route['editOld/(:num)'] = "user/editOld/$1";
+$route['editOld/(:num)/(:any)'] = "user/editOld/$1/$2";
 $route['editUser'] = "user/editUser";
 $route['deleteUser'] = "user/deleteUser";
 $route['profile'] = "user/profile";
@@ -119,5 +121,80 @@ $route['upload'] = "upload/upload";
 $route['saveupload'] = "upload/saveupload";
 $route['employeeListing'] = "payroll/employeeListing";
 $route['employeeListing/(:num)'] = "payroll/employeeListing/$1";
+
+$route['advanceListing'] = "advance/advanceListing";
+$route['advanceListing/(:num)'] = "advance/advanceListing/$1";
+$route['addNewAdvance'] = "advance/addNewAdvance";
+$route['addNewAdvanceSave'] = "advance/addNewAdvanceSave";
+$route['adListing'] = "advance/index";
+$route['adListing/(:any)'] = "advance/index/$1";
+$route['ajaxapprove'] = "advance/ajaxapprove";
+$route['advance/editOld'] = "advance/editOld";
+$route['advance/editOld/(:num)'] = "advance/editOld/$1";
+$route['editAdvance'] = "advance/editAdvance";
+$route['checkAdvance'] = "advance/checkAdvance";
+$route['viewAdvance/(:any)'] = "advance/viewAdvance/$1";
+$route['deleteAdvance'] = "advance/deleteAdvance";
+
+$route['vendorListing'] = "advance/vendorListing";
+$route['vendorListing/(:num)'] = "advance/vendorListing/$1";
+$route['adVendor'] = "advance/vendor";
+$route['adVendor/(:any)'] = "advance/vendor/$1";
+$route['viewVendor/(:any)'] = "advance/viewVendor/$1";
+$route['addNewVendor'] = "advance/addNewVendor";
+$route['addNewVendorSave'] = "advance/addNewVendorSave";
+$route['vendor/editOld'] = "advance/editOldVendor";
+$route['vendor/editOld/(:num)'] = "advance/editOldVendor/$1";
+$route['editVendor'] = "advance/editVendor";
+$route['deleteVendor'] = "advance/deleteVendor";
+$route['vendorajaxapprove'] = "advance/vendorajaxapprove";
+
+
+$route['expensesListing'] = "expenses/expensesListing";
+$route['expensesListing/(:num)'] = "expenses/expensesListing/$1";
+$route['addNewExpenses'] = "expenses/addNewExpenses";
+$route['addNewExpensesSave'] = "expenses/addNewExpensesSave";
+$route['exListing'] = "expenses/index";
+$route['exListing/(:any)'] = "expenses/index/$1";
+$route['expenses/ajaxapprove'] = "expenses/ajaxapprove";
+$route['expenses/editOld'] = "expenses/editOld";
+$route['expenses/editOld/(:num)'] = "expenses/editOld/$1";
+$route['editExpenses'] = "expenses/editExpenses";
+$route['checkExpenses'] = "expenses/checkExpenses";
+$route['viewExpenses/(:any)'] = "expenses/viewExpenses/$1";
+$route['pdfExpenses/(:any)'] = "expenses/pdfExpenses/$1";
+
+
+$route['addNewPayment'] = "payment/addNewPayment";
+$route['addNewPaymentSave'] = "payment/addNewPaymentSave";
+$route['paymentListing'] = "payment/index";
+$route['paymentListing/(:any)'] = "payment/index/$1";
+$route['paymentajaxapprove'] = "payment/ajaxapprove";
+$route['payment/editOld'] = "payment/editOld";
+$route['payment/editOld/(:num)'] = "payment/editOld/$1";
+$route['editPayment'] = "payment/editPayment";
+$route['checkPayment'] = "payment/checkPayment";
+$route['viewPayment/(:any)'] = "payment/viewPayment/$1";
+$route['paymentDownload/(:num)'] = "payment/download/$1";
+
+$route['roles'] = "user/viewRoles";
+$route['roles/(:num)'] = "user/viewRoles/$1";
+$route['manageRoles/(:num)'] = "user/manageRoles/$1";
+$route['updateRole/(:num)'] = "user/updateRole/$1";
+
+$route['uploadTrans'] = "upload/uploadTrans"; 
+$route['uploadCsv'] = "upload/salaryCsv";  
+
+$route['uploadStructure'] = "upload/uploadStructure";  
+$route['structureCsv'] = "upload/structureCsv";  
+
+$route['policy'] = 'user/policy';
+
+$route['expenseTotal'] = "expenses/expenseTotal";
+$route['expenseTotal/(:num)'] = "expenses/expenseTotal/$1";
+$route['vendorTotal'] = "payment/vendorTotal"; 
+$route['vendorTotal/(:num)'] = "payment/vendorTotal/$1";
+$route['queriesListing'] = "helpdesk/index";
+$route['deleteExpense'] = "expenses/deleteExpense";
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

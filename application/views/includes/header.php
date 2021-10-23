@@ -187,7 +187,13 @@
             <li>
               <a href="<?php echo base_url(); ?>userListing">
                 <i class="fa fa-users"></i>
-                <span>Employee</span>
+                <span>Employees</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url(); ?>easyuserListing">
+                <i class="fa fa-users"></i>
+                <span>OutSource Employees</span>
               </a>
             </li>
 
@@ -197,16 +203,105 @@
                 <span>Employees Salaries</span>
               </a>
             </li> 
+            <li>
+              <a href="<?php echo base_url();?>uploadTrans">
+                <i class="fa fa-users"></i>
+                <span>Upload Salary Transactions</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url();?>uploadStructure">
+                <i class="fa fa-users"></i>
+                <span>Upload Master Salary Structure</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url();?>upload">
+                <i class="fa fa-users"></i>
+                <span>Bulk Employees Upload</span>
+              </a>
+            </li>
             <?php
             }
             ?>
+            
             <li>
               <a href="<?php echo base_url();?>payroll">
                 <i class="fa fa-users"></i>
                 <span>Salary Slip</span>
               </a>
             </li>
+            <li>
+              <a href="<?php echo base_url();?>adListing">
+                <i class="fa fa-users"></i>
+                <span>Advance</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url();?>paymentListing">
+                <i class="fa fa-users"></i>
+                <span>Vendor Payment</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url();?>exListing">
+                <i class="fa fa-users"></i>
+                <span>Expenses</span>
+              </a>
+            </li>
+           <?php
+            if($role == ROLE_EMPLOYEE)
+            {
+            ?> 
+            <li>
+              <a href="<?php echo base_url();?>expenseTotal?userId=<?=$this->session->userdata('userId')?>">
+                <i class="fa fa-users"></i>
+                <span>Report</span>
+              </a>
+            </li>
+            <?php
+            }
+            ?>
+            <?php
+            if($role == ROLE_ADMIN)
+            {
+            ?>
+            <li>
+              <a href="<?php echo base_url();?>roles">
+                <i class="fa fa-users"></i>
+                <span>Roles</span>
+              </a>
+            </li>
+            <?php
+            }
+            ?>
+            <?php
+            if($this->session->userdata('userId') == '9')
+            {
+            ?>
+            <li>
+              <a href="<?php echo base_url();?>expenseTotal">
+                <i class="fa fa-users"></i>
+                <span>Report</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url();?>vendorTotal">
+                <i class="fa fa-users"></i>
+                <span>Vendor Report</span>
+              </a>
+            </li>
+            <li>
+              <a href="<?php echo base_url();?>queriesListing">
+                <i class="fa fa-users"></i>
+                <span>Help Desk</span>
+              </a>
+            </li>
 
+
+            <?php
+            }
+            ?>
           </ul>
         </section>
         <!-- /.sidebar -->

@@ -39,16 +39,28 @@ function userSalarySlip($payrollId){
 
     if($payrollId){
         
-        $this->db->select('User.*,Slip.month,Slip.year,Slip.presentDays,Slip.tds, Dept.departmentName, Des.designationName, ST.name as location, Slip.advance_deduction, Slip.PT');
+         $this->db->select('User.*,Slip.month,Slip.year,Slip.presentDays,Slip.tds, Dept.departmentName, Des.designationName, ST.name as location, Slip.advance_deduction, Slip.PT, Slip.arrear, Slip.incentive, Slip.rimbersement, Slip.arrear_pf, Slip.arrear_esic,Tran.basic as Tbasic,Tran.transAllow as TtransAllow, Tran.spclAllow as TspclAllow,Tran.lta as Tlta,Tran.hra as Thra,Tran.bonus as Tbonus,Slip.other_deduction');
         $this->db->from('tbl_salary_slip as Slip');
         $this->db->join('tbl_users as User','User.userId=Slip.userId','left');
         $this->db->join('tbl_departments as Dept','Dept.id=User.departmentId','left');
         $this->db->join('tbl_designations as Des','Des.id=User.designationId','left');
         $this->db->join('tbl_states as ST','ST.id=User.locationId','left');
+        $this->db->join('tbl_user_trans as Tran','Tran.userId=Slip.userId AND Tran.month=Slip.month AND Tran.year=Slip.year','left');
         $this->db->where('Slip.id',$payrollId);
         $query = $this->db->get();
         $result =  $query->result();
-
+        
+        /*$this->db->select('User.*,Slip.month,Slip.year,Slip.presentDays,Slip.tds, Dept.departmentName, Des.designationName, ST.name as location, Slip.advance_deduction, Slip.PT');
+        $this->db->from('tbl_salary_slip as Slip');
+        $this->db->join('tbl_users as User','User.userId=Slip.userId','left');
+        $this->db->join('tbl_departments as Dept','Dept.id=User.departmentId','left');
+        $this->db->join('tbl_designations as Des','Des.id=User.designationId','left');
+        $this->db->join('tbl_states as ST','ST.id=User.locationId','left');
+        $this->db->join('tbl_user_trans as Trans','Trans.userId=Slip.userId AND Trans.month=Slip.month AND Trans.year=Slip.year','left');
+        $this->db->where('Slip.id',$payrollId);
+        $query = $this->db->get();
+        $result =  $query->result();
+*/
         return $result;
 
     }

@@ -1,0 +1,3 @@
+userId,email,name,mobile,empCode,departmentId,designationId,doj,stateId,locationId,panNo,aadhar,pfuan,beneficiaryName,acNum,bankName,branch,city,ifscCode,basic,transAllow,spclAllow,lta,hra,bonus,empType
+3,dummy@aryacma.co.in,DUMMY,9541950132,ARDD01,1,1,2012-10-01,33,21,AFHPC2967A,'327070672836,'100580301671,FAKJBKS,401548501,ICICI BANK LTD,,,ICIC0000316,94080,0,78677,12500,47040,0,ARYA
+4,demo@aryacma.co.in,DEMO,9971719998,ARDD02,1,2,2012-09-28,33,21,AGXPR6668J,'530504241640,'100580149275,KJDAK,401131450,ICICI BANK LTD,,,ICIC0000004,94080,0,78677,12500,47040,0,EASY

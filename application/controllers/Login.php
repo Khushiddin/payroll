@@ -49,9 +49,11 @@ class Login extends CI_Controller
      */
     public function loginMe()
     {
+        
         $this->load->library('form_validation');
         
-        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|max_length[128]|trim');
+        //$this->form_validation->set_rules('email', 'Email', 'required|valid_email|max_length[128]|trim');
+        $this->form_validation->set_rules('email', 'Email', 'required|max_length[128]|trim');
         $this->form_validation->set_rules('password', 'Password', 'required|max_length[32]');
         
         if($this->form_validation->run() == FALSE)
@@ -71,6 +73,10 @@ class Login extends CI_Controller
 
                 $sessionArray = array('userId'=>$result->userId,                    
                                         'role'=>$result->roleId,
+                                        'empRole'=>$result->empRole,
+                                        'advanceLimit'=>$result->advanceLimit,
+                                        'expenseLimit'=>$result->expenseLimit,
+                                        'vendorLimit'=>$result->vendorLimit,
                                         'roleText'=>$result->role,
                                         'name'=>$result->name,
                                         'lastLogin'=> $lastLogin->createdDtm,
@@ -160,7 +166,7 @@ class Login extends CI_Controller
 
                     if($sendStatus){
                         $status = "send";
-                        setFlashData($status, "Reset password link sent successfully, please check mails.");
+                        setFlashData($status, "Reset password link sent on your email ID -please check your mail Box.");
                     } else {
                         $status = "notsend";
                         setFlashData($status, "Email has been failed, try again.");
